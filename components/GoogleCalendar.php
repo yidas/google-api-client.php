@@ -77,12 +77,7 @@ class GoogleCalendar
 
 		} catch (Exception $e) {
 			
-			$errorArray = json_decode($e->getMessage(), true);
-			// print_r($errorArray);exit;
-
-			$errorArray = $errorArray['error'];
-
-			throw new Exception($errorArray['message'], $errorArray['code']);
+			self::googleErrorHandle($e);
 		}
 
 		return $dataArray;
@@ -147,12 +142,7 @@ class GoogleCalendar
 			
 		} catch (Exception $e) {
 			
-			$errorArray = json_decode($e->getMessage(), true);
-			// print_r($errorArray);exit;
-
-			$errorArray = $errorArray['error'];
-
-			throw new Exception($errorArray['message'], $errorArray['code']);
+			self::googleErrorHandle($e);
 		}
 
 		return true;
@@ -171,5 +161,25 @@ class GoogleCalendar
 		}
 
 		return self::$service;
+	}
+
+	/**
+	 * Google Error Handler
+	 *
+	 * @param object $e Exception
+	 */
+	private static function googleErrorHandle($e)
+	{
+		$errorArray = json_decode($e->getMessage(), true);
+
+		// Detect json or standard message caught by Google Error Handler
+		if (json_last_error() != JSON_ERROR_NONE) {
+			
+			throw $e;
+		}
+
+		$errorArray = $errorArray['error'];
+
+		throw new Exception($errorArray['message'], $errorArray['code']);	
 	}
 }
