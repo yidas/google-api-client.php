@@ -47,30 +47,42 @@ class GoogleCalendar
 	 */
 	public static function eventList($calendarId='primary', $optParams=NULL)
 	{
-		# Option params
-		$optParams = $optParams ? $optParams : [
-											'maxResults' => 10,
-											'orderBy' => 'startTime',
-											'singleEvents' => TRUE,
-											'timeMin' => date('c'),
-											];
+		try {
+			
+			# Option params
+			$optParams = $optParams ? $optParams : [
+												'maxResults' => 10,
+												'orderBy' => 'startTime',
+												'singleEvents' => TRUE,
+												'timeMin' => date('c'),
+												];
 
-		# List by service
-		$results = self::getService()->events->listEvents($calendarId, $optParams);
+			# List by service
+			$results = self::getService()->events->listEvents($calendarId, $optParams);
 
-		# Output data
-		$dataArray = [];
+			# Output data
+			$dataArray = [];
 
-		# Data format process
-		if (count($results->getItems()) > 0) {
+			# Data format process
+			if (count($results->getItems()) > 0) {
 
-		    foreach ($results->getItems() as $event) {
+			    foreach ($results->getItems() as $event) {
 
-		        $data['title'] = $event->getSummary();
-		        $data['start'] = $event->start->dateTime ? $event->start->dateTime : $event->start->date;
-		        $data['end'] = $event->end->dateTime ? $event->end->dateTime : $event->end->date;
-		        $dataArray[] = $data;
-		    }
+			        $data['title'] = $event->getSummary();
+			        $data['start'] = $event->start->dateTime ? $event->start->dateTime : $event->start->date;
+			        $data['end'] = $event->end->dateTime ? $event->end->dateTime : $event->end->date;
+			        $dataArray[] = $data;
+			    }
+			}
+
+		} catch (Exception $e) {
+			
+			$errorArray = json_decode($e->getMessage(), true);
+			// print_r($errorArray);exit;
+
+			$errorArray = $errorArray['error'];
+
+			throw new Exception($errorArray['message'], $errorArray['code']);
 		}
 
 		return $dataArray;
