@@ -4,12 +4,17 @@
 * Google Calendar API Component
 *
 * @author   Nick Tsai <myintaer@gmail.com>
-* @version 	1.0.0
+* @version 	1.1.0
 * @see 		Composer: google/apiclient:^2.0
 * @link 	https://developers.google.com/google-apps/calendar/v3/reference/
 */
 class GoogleCalendar
 {
+	/**
+	 * @var Primary Calendar Title for calendarList()
+	 */
+	public static $primaryCalendarTitle = 'Primary';
+
 	/**
 	 * @var Google Calendar Service Object
 	 */
@@ -18,11 +23,15 @@ class GoogleCalendar
 	/**
 	 * Initialize
 	 *
-	 * @param object $service Google Service (Get from GoogleAPI::getService())
+	 * @param array $params Configuration
+	 *	'service' => object $service Google Service (Get from GoogleAPI::getService())
 	 */
-	function __construct($service)
+	function __construct($params=[])
 	{
-		$this->init($service);
+		if (isset($params['service'])) {
+			
+			$this->init($params['service']);
+		}
 	}
 
 	/**
@@ -36,6 +45,51 @@ class GoogleCalendar
 		self::$service = $service;
 
 		return true;
+	}
+
+	/**
+	 * Event List 
+	 *
+	 * @param bool $isOwner List only self's calendars
+	 * @return array Calendar list data
+	 */
+	public function calendarList($isOwner=false)
+	{
+		// Get Calendar.List
+		$calendarItems = self::getService()->calendarList
+			->listCalendarList()
+			->getItems();
+
+		// Process Calendar.List
+		$calendarList = [];
+
+		foreach ($calendarItems as $calendarListEntry) {
+
+			// Detect owner calendar
+			if ($isOwner && $calendarListEntry->getAccessRole()!='owner') {
+				
+				continue;
+			} 
+
+			// Detect Primary calendar and sort it to the first row
+			if ($calendarListEntry->getPrimary()) {
+				
+				$calendarTitle = self::$primaryCalendarTitle.
+					' ('.$calendarListEntry->getSummary().')';
+
+				$calendarList = array_merge(['primary'=>$calendarTitle], $calendarList);
+
+				$myCalendarList = array_merge(['primary'=>$calendarTitle], $calendarList);
+
+				continue;
+			}
+
+			$calendarID = $calendarListEntry->getID();
+
+			$calendarList[$calendarID] = $calendarListEntry->getSummary();
+		}
+		
+		return $calendarList;
 	}
 
 	/**

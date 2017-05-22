@@ -48,41 +48,11 @@ try {
 	 * Index
 	 */
 
-	// Get Calendat.List
-	$calendarItems = $service->calendarList
-		->listCalendarList()
-		->getItems();
-	// var_dump($calendarItems);exit;
+	// Get calendar lists
+	$calendarList = GoogleCalendar::calendarList();
 
-	// Process Calendat.List
-	$calendarList = [];
-	$myCalendarList = [];
-
-	foreach ($calendarItems as $calendarListEntry) {
-
-		// Detect Primary calendar and sort it to the first row
-		if ($calendarListEntry->getPrimary()) {
-			
-			$calendarTitle = 'Primary ('.$calendarListEntry->getSummary().')';
-
-			$calendarList = array_merge(['primary'=>$calendarTitle], $calendarList);
-
-			$myCalendarList = array_merge(['primary'=>$calendarTitle], $calendarList);
-
-			continue;
-		}
-
-		$calendarID = $calendarListEntry->getID();
-
-		$calendarList[$calendarID] = $calendarListEntry->getSummary();
-
-		// Detect owner calendar
-		if ($calendarListEntry->getAccessRole()=='owner') {
-			
-			$myCalendarList[$calendarID] = $calendarListEntry->getSummary();
-		} 
-	}
-	// print_r($calendarList);exit;
+	// Get calendar lists, which contain self canlendar only
+	$myCalendarList = GoogleCalendar::calendarList(true);
 
 	/**
 	 * Get Event List
