@@ -40,7 +40,7 @@ class GoogleCalendar
 	 * @param object $service Google Service (Get from GoogleAPI::getService())
 	 * @return bool Result
 	 */
-	public function init($service)
+	public static function init($service)
 	{
 		self::$service = $service;
 
@@ -53,7 +53,7 @@ class GoogleCalendar
 	 * @param bool $isOwner List only self's calendars
 	 * @return array Calendar list data
 	 */
-	public function calendarList($isOwner=false)
+	public static function calendarList($isOwner=false)
 	{
 		// Get Calendar.List
 		$calendarItems = self::getService()->calendarList
