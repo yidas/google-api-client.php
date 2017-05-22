@@ -23,7 +23,7 @@ Google API Client Libraries PHP Demo code
 
 ---
 
-## Libraries / Components
+## Libraries / Components inclusion
 
 - **Google API Client Provider** (Client Handler)  
   Provide interface and the cache of Client that help to develop Google API OAuth with getting services.
@@ -35,7 +35,7 @@ Google API Client Libraries PHP Demo code
 
 ---
 
-## Services
+## Google Services demonstration
 
 - **Google Plus**  
   For getting Google User information.
