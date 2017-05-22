@@ -23,11 +23,23 @@ Google API Client Libraries PHP Demo code
 
 ---
 
+## Libraries / Components
+
+- **Google API Client Provider** (Client Handler)  
+  Provide interface and the cache of Client that help to develop Google API OAuth with getting services.
+  
+- **Google API Client Model**  
+  Handling Google API Access Token for save, get and delete with extensible Data Store Carrier.
+  
+- **Google Calendar API Component**  
+
+---
+
 ## Services
 
-- Google Plus  
+- **Google Plus**  
   For getting Google User information.
     
-- Calendar
+- **Calendar**
 
-- Drive
+- **Drive**
