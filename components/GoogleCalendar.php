@@ -4,7 +4,7 @@
 * Google Calendar API Component
 *
 * @author   Nick Tsai <myintaer@gmail.com>
-* @version 	1.1.1
+* @version 	1.1.2
 * @see 		Composer: google/apiclient:^2.0
 * @link 	https://developers.google.com/google-apps/calendar/v3/reference/
 */
@@ -26,30 +26,54 @@ class GoogleCalendar
 	private static $service;
 
 	/**
-	 * Initialize
-	 *
-	 * @param array $params Configuration
-	 *	'service' => object $service Google Service (Get from GoogleAPI::getService())
+	 * Alias of set()
 	 */
 	function __construct($params=[])
 	{
-		if (isset($params['service'])) {
+		if ($params) {
 			
-			$this->init($params['service']);
+			self::set($params);
 		}
+		
 	}
 
 	/**
-	 * Initialize
+	 * Setting
+	 *
+	 * @param array $params Configuration
+	 *	'service' => object $service Google Service (Get from GoogleAPI::getService())
+	 * 	'{prop}' => Each public properties
+	 * @return object Self
+	 */
+	public static function set($params=[])
+	{
+		if (isset($params['service'])) {
+			
+			self::init($params['service']);
+		}
+
+		self::$primaryCalendarTitle = isset($params['primaryCalendarTitle']) 
+			? $params['primaryCalendarTitle'] 
+			: self::$primaryCalendarTitle;
+
+		self::$showPrimarySummary = isset($params['showPrimarySummary']) 
+			? $params['showPrimarySummary'] 
+			: self::$showPrimarySummary;
+
+		return new self;
+	}
+
+	/**
+	 * Initialize Service
 	 *
 	 * @param object $service Google Service (Get from GoogleAPI::getService())
-	 * @return bool Result
+	 * @return object Self
 	 */
 	public static function init($service)
 	{
 		self::$service = $service;
 
-		return true;
+		return new self;
 	}
 
 	/**
