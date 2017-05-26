@@ -119,21 +119,6 @@ class GoogleAPI
 	}
 
 	/**
-	 * Vendor autoload helper (Not recommend)
-	 *
-	 * @param string $autoloadFilePath
-	 * @return object Self
-	 * @example 
-	 *	GoogleAPI::autoload(__DIR__.'/../vendor/autoload.php');
-	 */
-	public static function autoload($autoloadFilePath)
-	{
-		require_once self::$autoloadPath;
-
-		return new self;
-	}
-
-	/**
 	 * Add Client Scope
 	 *
 	 * @param string|array $scopes Google API Client Scopes
