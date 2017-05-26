@@ -4,16 +4,21 @@
 * Google Calendar API Component
 *
 * @author   Nick Tsai <myintaer@gmail.com>
-* @version 	1.1.0
+* @version 	1.1.1
 * @see 		Composer: google/apiclient:^2.0
 * @link 	https://developers.google.com/google-apps/calendar/v3/reference/
 */
 class GoogleCalendar
 {
 	/**
-	 * @var Primary Calendar Title for calendarList()
+	 * @var string Primary Calendar Title for calendarList()
 	 */
 	public static $primaryCalendarTitle = 'Primary';
+
+	/**
+	 * @var bool Show Primary Calendar Summary in Title
+	 */
+	public static $showPrimarySummary = true;
 
 	/**
 	 * @var Google Calendar Service Object
@@ -74,8 +79,9 @@ class GoogleCalendar
 			// Detect Primary calendar and sort it to the first row
 			if ($calendarListEntry->getPrimary()) {
 				
-				$calendarTitle = self::$primaryCalendarTitle.
-					' ('.$calendarListEntry->getSummary().')';
+				$calendarTitle = self::$primaryCalendarTitle; 
+
+				$calendarTitle .= (self::$showPrimarySummary) ? ' ('.$calendarListEntry->getSummary().')' : '';
 
 				$calendarList = array_merge(['primary'=>$calendarTitle], $calendarList);
 
