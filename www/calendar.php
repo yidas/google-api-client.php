@@ -96,10 +96,19 @@ try {
 function addEditController()
 {
 	try {
-		echo date(DateTime::ISO8601);exit;
 
 		$calendarID = isset($_GET['id']) ? urldecode($_GET['id']) : 'primary';
-						
+		
+
+		/* DateTime handler demo */
+
+		date_default_timezone_set('Asia/Taipei'); 
+
+		$isoNow = date(DateTime::ISO8601);
+
+		$isoTomorrow = date(DateTime::ISO8601, (time()+86400));
+
+
 		/**
 		 * Insert
 		 */
@@ -126,13 +135,13 @@ function addEditController()
 		
 		$event->setSummary('Demo by GoogleAPI - Edit');
 
-		$dateObject = new Google_Service_Calendar_EventDateTime(); // WTF
-		// $dateObject->setTimeZone('Asia/Taipei');
-		$dateObject->setDateTime('2017-05-10T19:15:00+08:00');
+		// Set via Google_Service_Calendar_EventDateTime
+		$dateObject = new Google_Service_Calendar_EventDateTime();
+		$dateObject->setDateTime($isoNow);
 		$event->start = $dateObject;
 
-		$event->end->timeZone = 'Asia/Taipei';
-		$event->end->dateTime = '2017-05-13T19:15:00';
+		// Set directly
+		$event->end->dateTime = $isoTomorrow;
 
 		$updateAt = GoogleCalendar::eventUpdate($event);
 		// print_r($updateAt);
