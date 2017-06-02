@@ -4,7 +4,7 @@
 * Google Calendar API Component
 *
 * @author   Nick Tsai <myintaer@gmail.com>
-* @version 	1.1.2
+* @version 	1.1.3
 * @see 		Composer: google/apiclient:^2.0
 * @link 	https://developers.google.com/google-apps/calendar/v3/reference/
 */
@@ -193,7 +193,14 @@ class GoogleCalendar
 	 */
 	public static function eventGet($eventID, $calendarId='primary')
 	{
-		return self::getService()->events->get($calendarId, $eventID);
+		try {
+
+			return self::getService()->events->get($calendarId, $eventID);
+		
+		} catch (Exception $e) {
+			
+			self::googleErrorHandle($e);
+		}
 	}
 
 	/**
