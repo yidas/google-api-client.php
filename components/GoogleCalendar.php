@@ -172,7 +172,7 @@ class GoogleCalendar
 	 *
 	 * @param array $optParams 
 	 * @param string $calendarId Defaults to primary
-	 * @param bool $returnHtml Return ID if false. Defaults to true
+	 * @param bool $returnHtml Return type: true=>htmllink, false=>eventID
 	 * @return array Calendar data
 	 */
 	public static function eventInsert($optParams=[], $calendarId='primary', $returnHtml=false)
@@ -199,9 +199,8 @@ class GoogleCalendar
 	/**
 	 * Event Update
 	 *
+	 * @param object Google Calendar Event
 	 * @param string $calendarId Defaults to primary
-	 * @param array $optParams 
-	 * @param bool $returnHtml Return ID if false. Defaults to true
 	 * @return array Calendar data
 	 */
 	public static function eventUpdate($event, $calendarId='primary')
