@@ -1,4 +1,5 @@
-# Google-API-Client.php
+Google API Client for PHP
+=====================
 
 Google API Client Libraries PHP Demo code
 
@@ -10,7 +11,8 @@ Google API Client Libraries PHP Demo code
 
 ---
 
-## Installation
+Installation
+------------
 
 1. **Deploy code to PHP Web server**  
   The Document Root could be `{documentRoot}/{thisPackage}/www`.
@@ -23,7 +25,8 @@ Google API Client Libraries PHP Demo code
 
 ---
 
-## Libraries / Components inclusion
+Libraries / Components inclusion
+--------------------------------
 
 - **Google API Client Provider** (Client Handler)  
   Provide interface and the cache of Client that help to develop Google API OAuth with getting services.
@@ -35,7 +38,8 @@ Google API Client Libraries PHP Demo code
 
 ---
 
-## Google Services demonstration
+Google Services demonstration
+-----------------------------
 
 - **Google Plus**  
   For getting Google User information.
