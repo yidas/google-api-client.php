@@ -4,7 +4,7 @@
 * Google Calendar API Component
 *
 * @author   Nick Tsai <myintaer@gmail.com>
-* @version 	1.1.3
+* @version 	1.2.0
 * @see 		Composer: google/apiclient:^2.0
 * @link 	https://developers.google.com/google-apps/calendar/v3/reference/
 */
@@ -177,11 +177,18 @@ class GoogleCalendar
 	 */
 	public static function eventInsert($optParams=[], $calendarId='primary', $returnHtml=false)
 	{
-		$event = new Google_Service_Calendar_Event($optParams);
+		try {
 
-		$event = self::getService()->events->insert($calendarId, $event);
+			$event = new Google_Service_Calendar_Event($optParams);
 
-		return ($returnHtml) ? $event->htmlLink : $event->id;
+			$event = self::getService()->events->insert($calendarId, $event);
+
+			return ($returnHtml) ? $event->htmlLink : $event->id;
+			
+		} catch (Exception $e) {
+			
+			self::googleErrorHandle($e);
+		}
 	}
 
 	/**
@@ -212,9 +219,16 @@ class GoogleCalendar
 	 */
 	public static function eventUpdate($event, $calendarId='primary')
 	{
-		$updatedEvent = self::getService()->events->update($calendarId, $event->getId(), $event);
+		try {
+			
+			$updatedEvent = self::getService()->events->update($calendarId, $event->getId(), $event);
 
-		return $updatedEvent->getUpdated();
+			return $updatedEvent->getUpdated();
+
+		} catch (Exception $e) {
+			
+			self::googleErrorHandle($e);
+		}
 	}
 
 	/**
@@ -256,6 +270,7 @@ class GoogleCalendar
 	/**
 	 * Google Error Handler
 	 *
+	 * @todo This Handler is better to Separate out
 	 * @param object $e Exception
 	 */
 	private static function googleErrorHandle($e)
@@ -268,8 +283,36 @@ class GoogleCalendar
 			throw $e;
 		}
 
-		$errorArray = $errorArray['error'];
+		/* Formater */
 
-		throw new Exception($errorArray['message'], $errorArray['code']);	
+		// Default error data
+		$message = '';
+		$code = 400;
+
+		if (!isset($errorArray['error'])) {
+
+			throw $errorArray;
+		}
+
+		// Format
+		if (is_string($errorArray['error'])) {
+			
+			$message = $errorArray['error'];
+
+		} 
+		elseif (is_array($errorArray['error'])) {
+			
+			$arr = &$errorArray['error'];
+
+			$message = (isset($arr['message']))
+				? $arr['message']
+				: $message;
+
+			$code = (isset($arr['code']))
+				? $arr['code']
+				: $code;
+		}
+
+		throw new Exception($message, $code);	
 	}
 }
