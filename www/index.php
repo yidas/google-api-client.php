@@ -3,6 +3,9 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../components/GoogleApiModel.php';
 
+// Configuration
+$config = require __DIR__ . '/../config.inc.php';
+
 // print_r($_GET);
 // print_r($_SERVER);exit;
 
@@ -12,9 +15,6 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-$callback = "http://{$_SERVER['HTTP_HOST']}" . dirname($_SERVER['PHP_SELF']) . "/callback.php";
-$credentialPath = __DIR__ . '/../files/google_api_secret.json';
-
 $client = new Google_Client();
 $client->setApplicationName('Google API');
 $client->setScopes([
@@ -23,8 +23,8 @@ $client->setScopes([
 	// Google_Service_Calendar::CALENDAR,
 	// Google_Service_Drive::DRIVE,
 	]);
-$client->setAuthConfig($credentialPath);
-$client->setRedirectUri($callback);
+$client->setAuthConfig($config['authConfig']);
+$client->setRedirectUri($config['redirectUri']);
 $client->setAccessType('offline');
 $client->setApprovalPrompt('force'); 
 
@@ -45,7 +45,9 @@ if ($token) {
 	$servicePlus = new Google_Service_Plus($client);
 	$me = $servicePlus->people->get('me');
 	// Get default email
-	$me['email'] = $me['emails'][0]->value;
+  $me['email'] = $me['emails'][0]->value;
+
+  $accessToken = json_encode(GoogleApiModel::getToken(), JSON_PRETTY_PRINT);
 	
 } else {
 
@@ -151,7 +153,7 @@ if (isset($_GET['op'])) {
     <dt>Email:</dt>
       <dd><a href="mailto:<?=$me['email']?>" target="_blank"><?=$me['email']?></a></dd>
     <dt>AccessToken:</dt>
-      <dd><?=$accessToken?></dd>
+      <dd><pre><?=$accessToken?></pre></dd>
   </dl>
 
   <hr/>

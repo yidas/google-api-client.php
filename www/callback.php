@@ -3,8 +3,8 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../components/GoogleApiModel.php';
 
-$callback = "http://{$_SERVER['HTTP_HOST']}" . dirname($_SERVER['PHP_SELF']) . "/callback.php";
-$credentialPath = __DIR__ . '/../files/google_api_secret.json';
+// Configuration
+$config = require __DIR__ . '/../config.inc.php';
 
 // print_r($_SERVER);exit;
 // echo $callback;exit;
@@ -26,8 +26,8 @@ $client->setScopes([
 	// Google_Service_Calendar::CALENDAR,
 	// Google_Service_Drive::DRIVE,
 	]);
-$client->setAuthConfig($credentialPath);
-$client->setRedirectUri($callback);
+$client->setAuthConfig($config['authConfig']);
+$client->setRedirectUri($config['redirectUri']);
 $client->setAccessType('offline');
 $client->setApprovalPrompt('force'); 
 
