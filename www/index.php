@@ -1,7 +1,6 @@
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../components/GoogleAPI.php';
 require_once __DIR__ . '/../components/GoogleApiModel.php';
 
 // print_r($_GET);
@@ -13,29 +12,46 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-/**
- * Default Client for login info only without Scopes access
- *
- * Set Client with configuration and accessToken(if exist)
- */
-$authUrl = GoogleAPI::setClient([
-			'redirectUri' => 'http://' . $_SERVER['HTTP_HOST'].'/google-api/www',
-			])
-		->setAccessToken(GoogleApiModel::getToken())
-		->createAuthUrl();
+$callback = "http://{$_SERVER['HTTP_HOST']}" . dirname($_SERVER['PHP_SELF']) . "/callback.php";
+$credentialPath = __DIR__ . '/../files/google_api_secret.json';
 
-/**
- * Add Scopes for link type login then you can get access token with Scopes.
- */
-$authServicesUrl = GoogleAPI::addScopes([
-			Google_Service_Calendar::CALENDAR,
-			Google_Service_Drive::DRIVE,
-			])
-		->setClient([
-			'redirectUri' => 'http://' . $_SERVER['HTTP_HOST'].'/google-api/www',
-			])
-		->setAccessToken(GoogleApiModel::getToken())
-		->createAuthUrl();	
+$client = new Google_Client();
+$client->setApplicationName('Google API');
+$client->setScopes([
+	Google_Service_Plus::USERINFO_PROFILE,
+	Google_Service_Plus::USERINFO_EMAIL,
+	// Google_Service_Calendar::CALENDAR,
+	// Google_Service_Drive::DRIVE,
+	]);
+$client->setAuthConfig($credentialPath);
+$client->setRedirectUri($callback);
+$client->setAccessType('offline');
+$client->setApprovalPrompt('force'); 
+
+// Set Access Token
+$token = GoogleApiModel::getToken();
+// print_r($token);exit;
+
+if ($token) {
+
+	$client->setAccessToken($token);
+	// Refresh the token if it's expired.
+	if ($client->isAccessTokenExpired()) {
+
+		$client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+	}
+
+	// Plus Service
+	$servicePlus = new Google_Service_Plus($client);
+	$me = $servicePlus->people->get('me');
+	// Get default email
+	$me['email'] = $me['emails'][0]->value;
+	
+} else {
+
+	// Not login
+	$authUrl = $client->createAuthUrl();
+}
 
 /**
  * Route: Operation
@@ -69,122 +85,80 @@ if (isset($_GET['op'])) {
 			header('Location: ./');
 			break;
 	}
-	
-	
-	return;
-}
-
-/**
- * Route: OAuth Callback
- */
-if (isset($_GET['code'])) {
-	
-	$accessToken = GoogleAPI::authorize($_GET['code'])->getAccessToken();
-
-	// Save AccessToken if is register
-	if (isset($_SESSION['register_flag']) && $_SESSION['register_flag']) {
-		
-		$result = GoogleApiModel::saveToken($accessToken);
-
-		unset($_SESSION['register_flag']);
-	}
-
-	header('Location: ./');
 
 	return;
 }
 
-/**
- * Is Login
- */
-if (GoogleAPI::isAuth()) {
 
-	/**
-	 * Profile
-	 */
-	$servicePlus = GoogleAPI::getService('Google_Service_Plus');
-	$me = $servicePlus->people->get('me');
-	// Get default email
-	$me['email'] = $me['emails'][0]->value;
-	// print_r($me['emails']);exit;
-
-	// print "ID: {$me['id']}<br>";
-	// print "Display Name: {$me['displayName']}<br>";
-	// print "Image Url: {$me['image']['url']}<br>";
-	// print "Url: {$me['url']}<br>";
-	// print($me['emails'][0]->value);<br>";
-
-	$accessToken = json_encode( GoogleApiModel::getToken() );
-}
 
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-	<title></title>
+  <title></title>
 </head>
 <body>
 
-	<h3>Google API Services Demo</h3>
+  <h3>Google API Services Sample</h3>
 
-<?php if (!GoogleAPI::isAuth()): ?>
+<?php if (isset($authUrl)): ?>
 
-	Status: you are not login
+  Status: you are not login
 
-	<hr/>
+  <hr/>
 
-	<dl>
-		<dt><h3><a href="<?=$authUrl?>">Login</a></h3></dt>
-			<dd>
-				This will not work because you don't register yet, the function could be implement for User-GoogleID database mapping.
-			</dd>
-		<dt><h3><a href="./?op=register">Register</a></h3></dt>
-			<dd>
-				Register for basic scopes for login information, which will save AccessToken.
-			</dd>
-		<dt><h3><a href="./?op=register_services">Register-Services</a></h3></dt>
-			<dd>
-				Register for services such as Calendar or Drive, which will save AccessToken. </br>
-				This is base on register but adding more scopes.
-			</dd>
-	</dl>
+  <dl>
+    <dt><h3><a href="<?=$authUrl?>">Login</a></h3></dt>
+      <dd>
+        This will not work because you don't register yet, the function could be implement for User-GoogleID database mapping.
+      </dd>
+    <dt><h3><a href="./?op=register">Register</a></h3></dt>
+      <dd>
+        Register for basic scopes for login information, which will save AccessToken.
+      </dd>
+    <dt><h3><a href="./?op=register_services">Register-Services</a></h3></dt>
+      <dd>
+        Register for services such as Calendar or Drive, which will save AccessToken. </br>
+        This is base on register but adding more scopes.
+      </dd>
+  </dl>
 
 <?php else: ?>
 
-	<ul>
-		<li><a href="calendar.php">Google Calendar</a></li>
-		<li><a href="drive.php">Google Drive</a></li>
-	</ul>
+  <ul>
+    <li><a href="calendar.php">Google Calendar</a></li>
+    <li><a href="drive.php">Google Drive</a></li>
+  </ul>
 
-	<p>
-	* You need to Register-Services then you will have permission to access Services.
-	</p>
+  <p>
+  * You need to Register-Services then you will have permission to access Services.
+  </p>
 
-	<hr/>
+  <hr/>
 
-	<h4>Login User Profile</h4>
+  <h4>Login User Profile</h4>
 
-	<dl>
-		<dt>Google ID:</dt>
-			<dd><?=$me['id']?></dd>
-		<dt>Display Name:</dt>
-			<dd><?=$me['displayName']?></dd>
-		<dt>Image Url:</dt>
-			<dd><a href="<?=$me['image']['url']?>" target="_blank"><?=$me['image']['url']?></a></dd>
-		<dt>Plus Url:</dt>
-			<dd><a href="<?=$me['url']?>" target="_blank"><?=$me['url']?></a></dd>
-		<dt>Email:</dt>
-			<dd><a href="mailto:<?=$me['email']?>" target="_blank"><?=$me['email']?></a></dd>
-		<dt>AccessToken:</dt>
-			<dd><?=$accessToken?></dd>
-	</dl>
+  <dl>
+    <dt>Google ID:</dt>
+      <dd><?=$me['id']?></dd>
+    <dt>Display Name:</dt>
+      <dd><?=$me['displayName']?></dd>
+    <dt>Image Url:</dt>
+      <dd><a href="<?=$me['image']['url']?>" target="_blank"><?=$me['image']['url']?></a></dd>
+    <dt>Plus Url:</dt>
+      <dd><a href="<?=$me['url']?>" target="_blank"><?=$me['url']?></a></dd>
+    <dt>Email:</dt>
+      <dd><a href="mailto:<?=$me['email']?>" target="_blank"><?=$me['email']?></a></dd>
+    <dt>AccessToken:</dt>
+      <dd><?=$accessToken?></dd>
+  </dl>
 
-	<hr/>
+  <hr/>
 
-	<a href="<?=$authUrl?>">Re-Login</a> | <a href="./?op=register">Register</a> | <a href="./?op=register_services">Register-Services</a> | <a href="./?op=logout">Logout</a>
+  <a href="<?=$authUrl?>">Re-Login</a> | <a href="./?op=register">Register</a> | <a href="./?op=register_services">Register-Services</a> | <a href="./?op=logout">Logout</a>
 
 <?php endif ?>
-	
+  
 </body>
 </html>
