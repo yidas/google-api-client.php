@@ -23,7 +23,7 @@ Installation
 3. **Download and place Credential JSON**  
   Download the credential JSON file then rename and place it to `{documentRoot}/{thisPackage}/files/client_secret.json`.
   
-4. ** Vendor **
+4. **Vendor**  
   Run `composer install` to load vendor
 
 ---
