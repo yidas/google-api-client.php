@@ -55,7 +55,7 @@ ADDITIONS
 
 If you are using Windows as service server, you may deal with [SSL certificate problem](https://github.com/guzzle/guzzle/issues/394).
 
-This problem could be solved by modifing `/google-api/vendor/google/apiclient/src/Google/Client.php`:
+This problem could be solved by modifing `vendor/google/apiclient/src/Google/Client.php`:
 
 ```php
 // For windows PHP cURL
