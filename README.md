@@ -1,13 +1,10 @@
-Google API Client for PHP
-=====================
+Google API Client PHP Sample
+============================
 
-Google API Client Libraries PHP Demo code
+Google API Client Libraries with PHP sample code
 
-> Note: The google/apiclient vendor has already modified that turn off the Guzzle Verfify for Windows PHP in `/google-api/vendor/google/apiclient/src/Google/Client.php`
->```
->// For windows PHP cURL
->$options['verify'] = false;
->```
+
+
 
 ---
 
@@ -47,3 +44,19 @@ Google Services demonstration
 - **Calendar**
 
 - **Drive**
+
+---
+
+ADDITIONS
+---------
+
+
+### Guzzle SSL Verify Problem
+
+[SSL certificate problem](https://github.com/guzzle/guzzle/issues/394)
+
+> Note: The google/apiclient vendor has already modified that turn off the Guzzle Verfify for Windows PHP in `/google-api/vendor/google/apiclient/src/Google/Client.php`
+>```
+>// For windows PHP cURL
+>$options['verify'] = false;
+>```
