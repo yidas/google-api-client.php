@@ -59,5 +59,5 @@ This problem could be solved by modifing `/google-api/vendor/google/apiclient/sr
 
 ```php
 // For windows PHP cURL
->$options['verify'] = false;
+$options['verify'] = false;
 ```
