@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../components/GoogleApiModel.php';
+require_once __DIR__ . '/../components/User.php';
 
 // Configuration
 $config = require __DIR__ . '/../config.inc.php';
@@ -35,7 +35,7 @@ $client->setApprovalPrompt('force');
 $accessToken = $client->fetchAccessTokenWithAuthCode($code);
 // print_r($accessToken);exit;
 
-$result = GoogleApiModel::saveToken($accessToken);
+$result = User::saveToken($accessToken);
 
 // Redirect to index
 header('Location: ./');

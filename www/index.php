@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../components/GoogleApiModel.php';
+require_once __DIR__ . '/../components/User.php';
 
 // Configuration
 $config = require __DIR__ . '/../config.inc.php';
@@ -29,7 +29,7 @@ $client->setAccessType('offline');
 $client->setApprovalPrompt('force'); 
 
 // Set Access Token
-$token = GoogleApiModel::getToken();
+$token = User::getToken();
 // print_r($token);exit;
 
 if ($token) {
@@ -47,7 +47,7 @@ if ($token) {
 	// Get default email
   $me['email'] = $me['emails'][0]->value;
 
-  $accessToken = json_encode(GoogleApiModel::getToken(), JSON_PRETTY_PRINT);
+  $accessToken = json_encode(User::getToken(), JSON_PRETTY_PRINT);
 	
 } else {
 
@@ -82,7 +82,7 @@ if (isset($_GET['op'])) {
 		case 'logout':
 		default:
 			// Delete Access Token by Model
-			GoogleApiModel::deleteToken();
+			User::deleteToken();
 
 			header('Location: ./');
 			break;
