@@ -53,10 +53,11 @@ ADDITIONS
 
 ### Guzzle SSL Verify Problem
 
-[SSL certificate problem](https://github.com/guzzle/guzzle/issues/394)
+If you are using Windows as service server, you may deal with [SSL certificate problem](https://github.com/guzzle/guzzle/issues/394).
 
-> Note: The google/apiclient vendor has already modified that turn off the Guzzle Verfify for Windows PHP in `/google-api/vendor/google/apiclient/src/Google/Client.php`
->```
->// For windows PHP cURL
+This problem could be solved by modifing `/google-api/vendor/google/apiclient/src/Google/Client.php`:
+
+```php
+// For windows PHP cURL
 >$options['verify'] = false;
->```
+```
