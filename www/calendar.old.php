@@ -1,34 +1,22 @@
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../components/User.php';
+require_once __DIR__ . '/../components/GoogleAPI.php';
+require_once __DIR__ . '/../components/GoogleApiModel.php';
 require_once __DIR__ . '/../components/GoogleCalendar.php';
 
-// Configuration
-$config = require __DIR__ . '/../config.inc.php';
+// Set Client with accessToken(whether or not)
+$client = GoogleAPI::setClient()
+	->setAccessToken(GoogleApiModel::getToken())
+	->getClient();
 
-$token = User::getToken();
-if (!User::getToken()) {
+if (!GoogleAPI::isAuth()) {
 	
 	header('Location: ./');
 }
 
-$client = new Google_Client();
-$client->setApplicationName('Google API');
-$client->setAuthConfig($config['authConfig']);
-$client->setRedirectUri($config['redirectUri']);
-$client->setAccessType('offline');
-$client->setApprovalPrompt('force');
-$client->setAccessToken($token);
-// Refresh the token if it's expired.
-if ($client->isAccessTokenExpired()) {
-
-	$client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-}
-
 // Get Service for initializing GoogleCalendar
-// $service = GoogleAPI::getService('Google_Service_Calendar');
-$service = new Google_Service_Calendar($client);
+$service = GoogleAPI::getService('Google_Service_Calendar');
 
 // GoogleCalendar Component
 GoogleCalendar::init($service);

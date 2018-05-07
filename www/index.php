@@ -5,6 +5,11 @@ require_once __DIR__ . '/../components/User.php';
 
 // Configuration
 $config = require __DIR__ . '/../config.inc.php';
+// Google Service Scopes
+$serviceScopes = [
+    'calendar' => [Google_Service_Calendar::CALENDAR],
+    'drive' => [Google_Service_Drive::DRIVE],
+];
 
 // print_r($_GET);
 // print_r($_SERVER);exit;
@@ -42,11 +47,19 @@ if ($token) {
 	}
 
 	// Plus Service
-	$servicePlus = new Google_Service_Plus($client);
-	$me = $servicePlus->people->get('me');
-	// Get default email
-  $me['email'] = $me['emails'][0]->value;
+  $servicePlus = new Google_Service_Plus($client);
+  
+  try {
 
+    $me = $servicePlus->people->get('me');
+    // Get default email
+    $me['email'] = $me['emails'][0]->value;
+    
+  } catch (\Exception $e) {
+    
+    throw new Exception($e->getMessage(), $e->getCode());
+  }
+	
   $accessToken = json_encode(User::getToken(), JSON_PRETTY_PRINT);
 	
 } else {
@@ -59,36 +72,41 @@ if ($token) {
  * Route: Operation
  */
 if (isset($_GET['op'])) {
+  
+    switch ($_GET['op']) {
 
-	switch ($_GET['op']) {
+        case 'register':
 
-		case 'register':
+            header("Location: {$authUrl}");
 
-			$_SESSION['register_flag'] = true;
+            break;
 
-			header("Location: {$authUrl}");
+        case 'register_service':
+        
+            $service = (isset($_GET['service'])) ? $_GET['service'] : null;
+            if (!$service || !isset($serviceScopes[$service])) {
+              
+                echo 'Service not found';exit;
+            }
+            // Add Scopes
+            $client->setScopes($serviceScopes[$service]);
+            $authServicesUrl = $client->createAuthUrl();	
 
-			break;
+            header("Location: {$authServicesUrl}");
 
-		case 'register_services':
+            break;
 
-			$_SESSION['register_flag'] = true;
+        // Logout Controller
+        case 'logout':
+        default:
+            // Delete Access Token by Model
+            User::deleteToken();
 
-			header("Location: {$authServicesUrl}");
+            header('Location: ./');
+            break;
+    }
 
-			break;
-
-		// Logout Controller
-		case 'logout':
-		default:
-			// Delete Access Token by Model
-			User::deleteToken();
-
-			header('Location: ./');
-			break;
-	}
-
-	return;
+    return;
 }
 
 
@@ -129,8 +147,8 @@ if (isset($_GET['op'])) {
 <?php else: ?>
 
   <ul>
-    <li><a href="calendar.php">Google Calendar</a></li>
-    <li><a href="drive.php">Google Drive</a></li>
+    <li><a href="calendar.php">Google Calendar</a> (<a href="./?op=register_service&service=calendar">Register Access</a>)</li>
+    <li><a href="drive.php">Google Drive</a> (<a href="./?op=register_service&service=drive">Register Access</a>)</li>
   </ul>
 
   <p>
