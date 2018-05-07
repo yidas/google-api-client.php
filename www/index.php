@@ -20,6 +20,7 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+// Client
 $client = new Google_Client();
 $client->setApplicationName('Google API');
 $client->setScopes([
@@ -32,6 +33,48 @@ $client->setAuthConfig($config['authConfig']);
 $client->setRedirectUri($config['redirectUri']);
 $client->setAccessType('offline');
 $client->setApprovalPrompt('force'); 
+
+/**
+ * Route: Operation
+ */
+if (isset($_GET['op'])) {
+  
+  switch ($_GET['op']) {
+
+      case 'register':
+
+          $authUrl = $client->createAuthUrl();
+          header("Location: {$authUrl}");
+
+          break;
+
+      case 'register_service':
+      
+          $service = (isset($_GET['service'])) ? $_GET['service'] : null;
+          if (!$service || !isset($serviceScopes[$service])) {
+            
+              echo 'Service not found';exit;
+          }
+          // Add Scopes
+          $client->setScopes($serviceScopes[$service]);
+          $authServicesUrl = $client->createAuthUrl();	
+
+          header("Location: {$authServicesUrl}");
+
+          break;
+
+      // Logout Controller
+      case 'logout':
+      default:
+          // Delete Access Token by Model
+          User::deleteToken();
+
+          header('Location: ./');
+          break;
+  }
+
+  return;
+}
 
 // Set Access Token
 $token = User::getToken();
@@ -55,9 +98,14 @@ if ($token) {
     // Get default email
     $me['email'] = $me['emails'][0]->value;
     
-  } catch (\Exception $e) {
+  } catch (\Google_Service_Exception $e) {
+
+    $errors = print_r($e->getErrors(), true);
+    echo '<a href="./?op=logout">Logout</a><br/>';
+    echo "You got errors for {$e->getCode()} Status Code and the details are below:";
+    echo "<pre>{$errors}</pre>";
+    exit;
     
-    throw new Exception($e->getMessage(), $e->getCode());
   }
 	
   $accessToken = json_encode(User::getToken(), JSON_PRETTY_PRINT);
@@ -66,47 +114,6 @@ if ($token) {
 
 	// Not login
 	$authUrl = $client->createAuthUrl();
-}
-
-/**
- * Route: Operation
- */
-if (isset($_GET['op'])) {
-  
-    switch ($_GET['op']) {
-
-        case 'register':
-
-            header("Location: {$authUrl}");
-
-            break;
-
-        case 'register_service':
-        
-            $service = (isset($_GET['service'])) ? $_GET['service'] : null;
-            if (!$service || !isset($serviceScopes[$service])) {
-              
-                echo 'Service not found';exit;
-            }
-            // Add Scopes
-            $client->setScopes($serviceScopes[$service]);
-            $authServicesUrl = $client->createAuthUrl();	
-
-            header("Location: {$authServicesUrl}");
-
-            break;
-
-        // Logout Controller
-        case 'logout':
-        default:
-            // Delete Access Token by Model
-            User::deleteToken();
-
-            header('Location: ./');
-            break;
-    }
-
-    return;
 }
 
 

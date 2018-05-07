@@ -123,7 +123,7 @@ class User
 		switch (self::$storage) {
 
 			case 'file':
-				file_put_contents(self::_filepath(), NULL);
+				unlink(self::_filepath());
 				break;
 
 			case 'session':
