@@ -7,7 +7,7 @@
 * OAuth with getting services.
 *
 * @author   Nick Tsai <myintaer@gmail.com>
-* @version 	1.1.0
+* @version 	1.2.0
 * @see 		Composer: google/apiclient:^2.0
 * @link 	https://developers.google.com/google-apps/calendar/v3/reference/
 * @example
@@ -29,7 +29,7 @@
 *		->setClient()
 *		->getClient();
 */
-class GoogleAPI 
+class GoogleAPI
 {
 	
 	/**
@@ -65,7 +65,7 @@ class GoogleAPI
 	/**
 	 * @var string Google API console json secret file path
 	 */
-	public static $clientSecretPath = __DIR__ . '/../files/client_secret.json';
+	public static $clientSecretPath = '/srv/google_api_secret.json';
 
 	/**
 	 * @var string Authorized redirect URI
@@ -74,6 +74,10 @@ class GoogleAPI
 
 	/**
 	 * Set Google API Client
+	 *
+	 * This method will create a new Client with customized configuration,
+	 * and the service caches will clean up in order to prevent Inconsistent
+	 * AccessToken.
 	 *
 	 * @param array Configuration based on properties
 	 * @return object Self
@@ -95,6 +99,9 @@ class GoogleAPI
 		self::$clientRedirectUri = (isset($config['redirectUri'])) 
 			? $config['redirectUri'] 
 			: self::$clientRedirectUri;
+
+		// Reset service caches
+		self::$services = [];
 
 		// Check secret file path
 		if (!file_exists(self::$clientSecretPath)) {
@@ -149,37 +156,6 @@ class GoogleAPI
 	}
 
 	/**
-	 * Set access token to client 
-	 *
-	 * @param array $accessToken
-	 * @return object Self
-	 */
-	public static function setAccessToken($accessToken)
-	{
-		if ($accessToken) {
-			
-			$client = self::getClient();
-
-			// Set AccessToken (throw error if token is invalid)
-			$client->setAccessToken($accessToken);
-			
-			// Refresh the token if it's expired.
-			if ($client->isAccessTokenExpired()) {
-
-				$client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-			}
-
-			// Save authorized Client
-			self::$client = $client;
-
-			// Save accessToken
-			self::$accessToken = $accessToken;
-		}
-
-		return new self;
-	}
-
-	/**
 	 * Get Google API Client
 	 *
 	 * @return object Self
@@ -208,6 +184,50 @@ class GoogleAPI
 		// Exchange authorization code for an access token.
 		self::$accessToken = self::getClient()->fetchAccessTokenWithAuthCode($authCode);
 		
+		return new self;
+	}
+
+	/**
+	 * Set access token to client 
+	 *
+	 * @param array $accessToken
+	 * @param bool $resetClient Switch for auto recreating Client
+	 * @return object Self
+	 */
+	public static function setAccessToken($accessToken, $resetClient=true)
+	{
+		if ($accessToken) {
+
+			// Google Client can not reset accessToken
+			if (self::$accessToken) {
+				
+				if (!$resetClient) {
+
+					throw new Exception("Reduplicate setAccessToken", 500);
+				}
+
+				// Reset Client if accessToken is already set
+				self::setClient();
+			}
+			
+			$client = self::getClient();
+			
+			// Set AccessToken (throw error if token is invalid)
+			$client->setAccessToken($accessToken);
+					
+			// Refresh the token if it's expired.
+			if ($client->isAccessTokenExpired()) {
+
+				$client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+			}
+
+			// Save authorized Client
+			self::$client = $client;
+
+			// Save accessToken
+			self::$accessToken = $accessToken;
+		}
+
 		return new self;
 	}
 

@@ -1,5 +1,17 @@
 {
+    "name": "yidas/google-api-sample",
+    "description": "Google API Client Libraries with Google service samples for PHP",
+    "keywords": ["Google Client", "Google API", "PHP SDK", "Google Services"],
+    "homepage": "https://github.com/yidas/google-api-sample",
+    "type": "project",
+    "license": "MIT",
+    "support": {
+        "issues": "https://github.com/yidas/google-api-sample/issues",
+        "source": "https://github.com/yidas/google-api-sample"
+    },
+    "minimum-stability": "stable",
     "require": {
+        "php": ">=5.4.0",
         "google/apiclient": "^2.0"
     }
 }
