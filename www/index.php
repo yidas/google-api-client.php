@@ -7,6 +7,10 @@ require_once __DIR__ . '/../components/User.php';
 $config = require __DIR__ . '/../config.inc.php';
 // Google Service Scopes
 $serviceScopes = [
+    'plus' => [
+        Google_Service_Plus::USERINFO_PROFILE,
+        Google_Service_Plus::USERINFO_EMAIL,
+    ],
     'calendar' => [Google_Service_Calendar::CALENDAR],
     'drive' => [Google_Service_Drive::DRIVE],
 ];
@@ -23,12 +27,7 @@ if (session_status() == PHP_SESSION_NONE) {
 // Client
 $client = new Google_Client();
 $client->setApplicationName('Google API');
-$client->setScopes([
-	Google_Service_Plus::USERINFO_PROFILE,
-	Google_Service_Plus::USERINFO_EMAIL,
-	// Google_Service_Calendar::CALENDAR,
-	// Google_Service_Drive::DRIVE,
-	]);
+$client->setScopes($serviceScopes['plus']);
 $client->setAuthConfig($config['authConfig']);
 $client->setRedirectUri($config['redirectUri']);
 $client->setAccessType('offline');
@@ -56,7 +55,8 @@ if (isset($_GET['op'])) {
               echo 'Service not found';exit;
           }
           // Add Scopes
-          $client->setScopes($serviceScopes[$service]);
+          $scopes = array_merge($serviceScopes['plus'], $serviceScopes[$service]);
+          $client->setScopes($scopes);
           $authServicesUrl = $client->createAuthUrl();	
 
           header("Location: {$authServicesUrl}");
