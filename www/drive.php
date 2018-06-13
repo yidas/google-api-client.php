@@ -1,24 +1,32 @@
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../components/GoogleAPI.php';
-require_once __DIR__ . '/../components/GoogleApiModel.php';
+require_once __DIR__ . '/../components/User.php';
 
-// Set Client with accessToken(whether or not)
-$client = GoogleAPI::setClient()
-	->setAccessToken(GoogleApiModel::getToken())
-	->getClient();
-	
-if (!GoogleAPI::isAuth()) {
+// Configuration
+$config = require __DIR__ . '/../config.inc.php';
+
+$token = User::getToken();
+if (!User::getToken()) {
 	
 	header('Location: ./');
 }
 
-/**
- * Google Drive Service
- */
-$service = GoogleAPI::getService('Google_Service_Drive');
+$client = new Google_Client();
+$client->setApplicationName('Google API');
+$client->setAuthConfig($config['authConfig']);
+$client->setRedirectUri($config['redirectUri']);
+$client->setAccessType('offline');
+$client->setApprovalPrompt('force');
+$client->setAccessToken($token);
+// Refresh the token if it's expired.
+if ($client->isAccessTokenExpired()) {
 
+	$client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+}
+
+// Get Service
+$service = new Google_Service_Drive($client);
 
 try {
 
