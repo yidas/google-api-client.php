@@ -3,12 +3,9 @@ Google API Client PHP Sample
 
 Google API Client Libraries with PHP sample code
 
-
-
-
 ---
 
-Installation
+INSTALLATION
 ------------
 
 1. **Deploy code to PHP Web server**  
