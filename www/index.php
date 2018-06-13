@@ -1,10 +1,24 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php';
+$autoloadPath = __DIR__ . '/../vendor/autoload.php';
+if (!file_exists($autoloadPath)) {
+
+    die('Composer is not set, run `composer install` in the app root.');
+}
+
+require_once $autoloadPath;
 require_once __DIR__ . '/../components/User.php';
 
 // Configuration
 $config = require __DIR__ . '/../config.inc.php';
+
+// Check
+if (!file_exists($config['authConfig'])) {
+
+    die("Please set up Google credential file in {$config['authConfig']}");
+}
+
+
 // Google Service Scopes
 $serviceScopes = [
     'plus' => [
