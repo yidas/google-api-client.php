@@ -33,6 +33,16 @@ class User
 	];
 
 	/**
+	 * Storage data format
+	 *
+	 * @var array
+	 */
+	public static $data = [
+		'services' => [],
+		'accessToken' => null,
+	];
+
+	/**
 	 * Initialization
 	 *
 	 * @return object Self
@@ -55,6 +65,8 @@ class User
 		self::$storage = $options['storage'];
 		self::$storages[self::$storage] = $options['storageConfig'];
 
+		self::$data = self::getData();
+
 		return new self;
 	}
 
@@ -67,21 +79,7 @@ class User
 	{
 		self::init();
 
-		$jsonData = json_encode($accessTokenArray);
-
-		switch (self::$storage) {
-
-			case 'file':
-				file_put_contents(self::_filepath(), $jsonData);
-				break;
-
-			case 'session':
-			default:
-				$_SESSION[self::_getConfig('key')] = $jsonData;
-				break;
-		}
-
-		return true;
+		return self::saveData('accessToken', json_encode($accessTokenArray));
 	}
 
 	/**
@@ -93,24 +91,11 @@ class User
 	{
 		self::init();
 
-		switch (self::$storage) {
+		$accessToken = self::getData('accessToken');
 
-			case 'file':
-
-				if (!file_exists(self::_filepath())) {
-					return false;
-				}
-
-				$jsonData = file_get_contents(self::_filepath());
-				break;
-
-			case 'session':
-			default:
-				$jsonData = isset($_SESSION[self::_getConfig('key')]) ? $_SESSION[self::_getConfig('key')] : NULL;
-				break;
-		}
-
-		return json_decode($jsonData, true);
+		return ($accessToken) 
+			? json_decode($accessToken, true) 
+			: null;
 	}
 
 	/**
@@ -120,19 +105,122 @@ class User
 	{
 		self::init();
 
+		return self::saveData('accessToken', null);
+	}
+
+	/**
+	 * Get Services
+	 *
+	 * @param stirng $service
+	 * @return bool
+	 */
+	public static function getServices()
+	{
+		self::init();
+
+		return self::getData('services');
+	}
+
+	/**
+	 * Add Service
+	 *
+	 * @param stirng $service
+	 * @return bool
+	 */
+	public static function addService($service)
+	{
+		self::init();
+
+		$services = self::getData('services');
+
+		array_push($services, $service);
+
+		return self::saveData('services', $services);
+	}
+
+	/**
+	 * Remove Service
+	 *
+	 * @param stirng $service
+	 * @return bool
+	 */
+	public static function removeService($service)
+	{
+		self::init();
+
+		$services = self::getData('services');
+
+		if (($key = array_search($service, $services)) !== false) {
+			unset($services[$key]);
+		}
+
+		return self::saveData('services', $services);
+	}
+
+	/**
+	 * Save data
+	 *
+	 * @param string $key
+	 * @param mixed $value
+	 * @return void
+	 */
+	protected static function saveData($key, $value)
+	{
+		self::$data[$key] = $value;
+
+		$streamData = json_encode(self::$data);
+
 		switch (self::$storage) {
 
 			case 'file':
-				unlink(self::_filepath());
+				file_put_contents(self::_filepath(), $streamData);
 				break;
 
 			case 'session':
 			default:
-				unset($_SESSION[self::_getConfig('key')]);
+				$_SESSION[self::_getConfig('key')] = $streamData;
 				break;
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get data
+	 *
+	 * @param string $key
+	 * @return array self::$data
+	 */
+	protected static function getData($key=null)
+	{
+		switch (self::$storage) {
+
+			case 'file':
+
+				if (!file_exists(self::_filepath())) {
+					return false;
+				}
+
+				$streamData = file_get_contents(self::_filepath());
+				break;
+
+			case 'session':
+			default:
+				$streamData = isset($_SESSION[self::_getConfig('key')]) ? $_SESSION[self::_getConfig('key')] : NULL;
+				break;
+		}
+
+		self::$data = json_decode($streamData, true);
+
+		if ($key) {
+			
+			return isset(self::$data[$key]) ? self::$data[$key] : null;
+
+		} else {
+
+			return self::$data;
+		}
+
 	}
 
 	/**
