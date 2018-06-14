@@ -77,6 +77,20 @@ if (isset($_GET['op'])) {
 			header("Location: {$authServicesUrl}");
 			break;
 			
+		case 'deregister_service':
+
+			$service = (isset($_GET['service'])) ? $_GET['service'] : null;
+			
+			if (!$service || !isset($serviceScopes[$service])) {
+				
+				echo 'Service not found';exit;
+			}
+
+			User::removeService($service);
+			
+			header("Location: ./");
+			break;
+		
 		case 'register_services':
 
 			// Register all services
@@ -84,6 +98,8 @@ if (isset($_GET['op'])) {
 				
 				$client->addScope($service);
 			}
+
+			User::registerService('all');
 
 			$authServicesUrl = $client->createAuthUrl();	
 			header("Location: {$authServicesUrl}");
@@ -126,6 +142,9 @@ if ($token) {
 		$me = $servicePlus->people->get('me');
 		// Get default email
 		$me['email'] = $me['emails'][0]->value;
+
+		// Owned services
+		$services = User::getServices();
 		
 	} catch (\Google_Service_Exception $e) {
 		
@@ -161,31 +180,52 @@ if ($token) {
 <?php if (isset($authUrl)): ?>
 
 Status: you are not login
+</br>
+User Session: <?=session_id()?>
 
 <hr/>
 
+<p>This sample code assume you are already identitied by your session ID, you would lost identity without the keeping session.</p>
+
 <dl>
-<dt><h3><a href="<?=$authUrl?>">Login</a></h3></dt>
-<dd>
-This will not work because you don't register yet, the function could be implement for User-GoogleID database mapping.
-</dd>
 <dt><h3><a href="./?op=register">Register</a></h3></dt>
 <dd>
-Register for basic scopes for login information, which will save AccessToken.
+Register for basic scopes for login information.
 </dd>
-<dt><h3><a href="./?op=register_services">Register-Services</a></h3></dt>
+<dt><h3><a href="./?op=register_services">Register all Services</a></h3></dt>
 <dd>
-Register for services such as Calendar or Drive, which will save AccessToken. </br>
-This is base on register but adding more scopes.
+Register all the Google services such as Calendar or Drive. </br>
+This is base on register but adding all the service scopes.
 </dd>
 </dl>
 
 <?php else: ?>
 
 <ul>
-<li><a href="calendar.php">Google Calendar</a> (<a href="./?op=register_service&service=calendar">Register Access</a>)</li>
-<li><a href="drive.php">Google Drive</a> (<a href="./?op=register_service&service=drive">Register Access</a>)</li>
-<li><a href="contacts.php">Google Contacts</a> (<a href="./?op=register_service&service=contacts">Register Access</a>)</li>
+<li>
+	<a href="calendar.php">Google Calendar</a> 
+	<?php if(in_array('calendar', $services)):?>
+		(<a href="./?op=deregister_service&service=calendar">Deregister Access</a>)
+	<?php else: ?>
+		(<a href="./?op=register_service&service=calendar">Register Access</a>)
+	<?php endif ?>
+</li>
+<li>
+	<a href="drive.php">Google Drive</a> 
+	<?php if(in_array('drive', $services)):?>
+		(<a href="./?op=deregister_service&service=drive">Deregister Access</a>)
+	<?php else: ?>
+		(<a href="./?op=register_service&service=drive">Register Access</a>)
+	<?php endif ?>
+</li>
+<li>
+	<a href="contacts.php">Google Contacts</a> 
+	<?php if(in_array('contacts', $services)):?>
+		(<a href="./?op=deregister_service&service=contacts">Deregister Access</a>)
+	<?php else: ?>
+		(<a href="./?op=register_service&service=contacts">Register Access</a>)
+	<?php endif ?>
+</li>
 </ul>
 
 <p>
@@ -213,7 +253,7 @@ This is base on register but adding more scopes.
 
 <hr/>
 
-<a href="<?=$authUrl?>">Re-Login</a> | <a href="./?op=register">Register</a> | <a href="./?op=register_services">Register-All-Services</a> | <a href="./?op=logout">Logout</a>
+<a href="./?op=register">Register Again (Services will gone)</a> | <a href="./?op=register_services">Register-All-Services</a> | <a href="./?op=logout">Logout</a>
 
 <?php endif ?>
 

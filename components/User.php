@@ -181,6 +181,7 @@ class User
 		$services = self::getData('services');
 
 		if (($key = array_search($service, $services)) !== false) {
+			
 			unset($services[$key]);
 		}
 
