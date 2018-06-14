@@ -23,8 +23,7 @@ $client->setAccessToken($token);
 if ($client->isAccessTokenExpired()) {
 
     $token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-    // var_dump($token);
-	// exit;
+	User::saveToken($token);
 }
 
 // Get Service

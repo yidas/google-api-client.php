@@ -20,15 +20,7 @@ if (!file_exists($config['authConfig'])) {
 
 
 // Google Service Scopes
-$serviceScopes = [
-	'plus' => [
-		Google_Service_Plus::USERINFO_PROFILE,
-		Google_Service_Plus::USERINFO_EMAIL,
-	],
-	'calendar' => [Google_Service_Calendar::CALENDAR],
-	'drive' => [Google_Service_Drive::DRIVE],
-	'contacts' => ["https://www.google.com/m8/feeds"],
-];
+$serviceScopes = $config['serviceScopes'];
 
 // print_r($_GET);
 // print_r($_SERVER);exit;
@@ -79,7 +71,7 @@ if (isset($_GET['op'])) {
 
 			// Add Scopes
 			$client->addScope($serviceScopes[$service]);
-			User::addService($service);
+			User::registerService($service);
 
 			$authServicesUrl = $client->createAuthUrl();	
 			header("Location: {$authServicesUrl}");
@@ -100,8 +92,8 @@ if (isset($_GET['op'])) {
 		// Logout Controller
 		case 'logout':
 		
-			// Delete Access Token by Model
-			User::deleteToken();
+			// Reset all user data
+			User::resetData();
 		
 		default:
 		

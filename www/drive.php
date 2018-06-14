@@ -22,7 +22,8 @@ $client->setAccessToken($token);
 // Refresh the token if it's expired.
 if ($client->isAccessTokenExpired()) {
 
-	$client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+	$token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+	User::saveToken($token);
 }
 
 // Get Service

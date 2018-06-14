@@ -39,6 +39,7 @@ class User
 	 */
 	public static $data = [
 		'services' => [],
+		'registerService' => null,
 		'accessToken' => null,
 	];
 
@@ -122,6 +123,32 @@ class User
 	}
 
 	/**
+	 * Register Service
+	 *
+	 * @param stirng $service
+	 * @return bool
+	 */
+	public static function registerService($service)
+	{
+		self::init();
+
+		return self::saveData('registerService', $service);
+	}
+
+	/**
+	 * Get Register Service
+	 *
+	 * @param stirng $service
+	 * @return bool
+	 */
+	public static function getRegisterService()
+	{
+		self::init();
+
+		return self::getData('registerService');
+	}
+
+	/**
 	 * Add Service
 	 *
 	 * @param stirng $service
@@ -133,7 +160,10 @@ class User
 
 		$services = self::getData('services');
 
-		array_push($services, $service);
+		if (!in_array($service, $services)) {
+			
+			array_push($services, $service);
+		}
 
 		return self::saveData('services', $services);
 	}
@@ -198,7 +228,9 @@ class User
 			case 'file':
 
 				if (!file_exists(self::_filepath())) {
-					return false;
+
+					$streamData = null;
+					break;
 				}
 
 				$streamData = file_get_contents(self::_filepath());
@@ -210,7 +242,10 @@ class User
 				break;
 		}
 
-		self::$data = json_decode($streamData, true);
+		if ($streamData) {
+			
+			self::$data = json_decode($streamData, true);
+		}
 
 		if ($key) {
 			
@@ -220,7 +255,35 @@ class User
 
 			return self::$data;
 		}
+	}
 
+	/**
+	 * Reset data
+	 *
+	 * @return void
+	 */
+	public static function resetData()
+	{
+		switch (self::$storage) {
+
+			case 'file':
+
+				if (!file_exists(self::_filepath())) {
+
+					$streamData = null;
+					break;
+				}
+
+				$streamData = unlink(self::_filepath());
+				break;
+
+			case 'session':
+			default:
+				session_destroy();
+				break;
+		}
+
+		return true;
 	}
 
 	/**
