@@ -30,76 +30,51 @@ if ($client->isAccessTokenExpired()) {
 // $service = new Google_Service_Drive($client);
 // var_dump($client);
 
-$client->addScope("https://www.google.com/m8/feeds");
+// $client->addScope("https://www.google.com/m8/feeds");
 // $authUrl = $client->createAuthUrl();
 // echo $authUrl;
 $accessToken = $token['access_token'];
 
-$url = 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&v=3.0&oauth_token='.$accessToken;
-
-
-  $response =  file_get_contents($url);
-  print_r($response);exit;
-
 try {
 
-	/**
-	 * Operation
-	 */
-	if (isset($_GET['op'])) {
+	// $url = 'https://www.google.com/m8/feeds/groups/default/full?alt=json&v=3.0&max-results=1000&oauth_token='.$accessToken;
+	// $url = 'http://www.google.com/feeds/contacts/groups/default/base/6?alt=json&v=3.0&max-results=1000&oauth_token='.$accessToken;
+	// echo $url;exit;
+	// $url = 'https://www.google.com/m8/feeds/contacts/groups/default/base/6?alt=json&v=3.0&max-results=1000&oauth_token='.$accessToken;
+
+	// All contacts from token user
+	$url = 'https://www.google.com/m8/feeds/contacts/default/thin?alt=json&v=3.0&max-results=1000&oauth_token='.$accessToken;
+
+
+	$response = @file_get_contents($url, false, stream_context_create([
+		'http' => [
+			'header' => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36",
+		]
+	]));
+	$status = $http_response_header[0];
+	// echo $status;echo $response;exit;
+
+	$result = json_decode($response, true);
+	// print_r($result);exit;
+
+	// Parser
+	$rawContacts = & $result['feed']['entry'];
+	// print_r($rawContacts);exit;
+	
+	$contacts = [];
+	// Formatter
+	foreach ((array)$rawContacts as $key => $raw) {
 		
-		switch ($_GET['op']) {
-			case 'upload':
+		$data = [];
+		$data['id'] = isset($raw['id']['$t']) ? $raw['id']['$t'] : null;
+		$data['updated'] = isset($raw['updated']['$t']) ? $raw['updated']['$t'] : null;
+		$data['title'] = isset($raw['title']['$t']) ? $raw['title']['$t'] : null;
+		$data['phone'] = isset($raw['gd$phoneNumber'][0]['$t']) ? $raw['gd$phoneNumber'][0]['$t'] : null;
+		$data['email'] = isset($raw['gd$email'][0]['address']) ? $raw['gd$email'][0]['address'] : null;
 
-				if (isset($_POST["submit"])) {
-
-					try {
-
-						$files = $_FILES["file_upload"];
-
-						$fileMetadata = new Google_Service_Drive_DriveFile([
-							'name' => basename($files['name'])
-							]);
-
-						$content = file_get_contents($files["tmp_name"]);
-
-						$file = $service->files->create($fileMetadata, [
-							'data' => $content,
-							// 'mimeType' => 'image/jpeg',
-							'uploadType' => 'multipart',
-							'fields' => 'id'
-							]);
-
-					} catch (Exception $e) {
-						
-						throw $e;
-					}	
-				}
-
-				echo "Operation Success!<br/> Updated ID: {$file->id}<br/> <a href=\"?\">Back to List Page</a>";
-
-				break;
-			
-			default:
-				echo '404 - Bad Operation';
-				break;
-		}
-
-		return;
+		$contacts[] = $data;
 	}
-
-
-	/**
-	 * Index List
-	 */
-
-	// Print the names and IDs for up to 10 files.
-	$optParams = [
-	  	'pageSize' => 10,
-	  	'fields' => 'nextPageToken, files(id, name)'
-	];
-
-	$results = $service->files->listFiles($optParams);
+	print_r($contacts);exit;
 
 } catch (Exception $e) {
 
