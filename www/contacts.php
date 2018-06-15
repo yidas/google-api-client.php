@@ -61,14 +61,15 @@ try {
 	$rawContacts = & $result['feed']['entry'];
 	// print_r($rawContacts);exit;
 	
-	$contacts = [];
 	// Formatter
+	$contacts = [];
 	foreach ((array)$rawContacts as $key => $raw) {
 		
 		$data = [];
 		$data['id'] = isset($raw['id']['$t']) ? $raw['id']['$t'] : null;
 		$data['updated'] = isset($raw['updated']['$t']) ? $raw['updated']['$t'] : null;
 		$data['title'] = isset($raw['title']['$t']) ? $raw['title']['$t'] : null;
+		$data['name'] = isset($raw['gd$name']['gd$fullName']['$t']) ? $raw['gd$name']['gd$fullName']['$t'] : null;
 		$data['phone'] = isset($raw['gd$phoneNumber'][0]['$t']) ? $raw['gd$phoneNumber'][0]['$t'] : null;
 		$data['email'] = isset($raw['gd$email'][0]['address']) ? $raw['gd$email'][0]['address'] : null;
 
