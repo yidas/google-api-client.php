@@ -219,11 +219,11 @@ This is base on register but adding all the service scopes.
 	<?php endif ?>
 </li>
 <li>
-	<a href="contacts.php">Google Contacts</a> 
-	<?php if(in_array('contacts', $services)):?>
-		(<a href="./?op=deregister_service&service=contacts">Deregister Access</a>)
+	<a href="people.php">Google People Contacts</a> 
+	<?php if(in_array('people', $services)):?>
+		(<a href="./?op=deregister_service&service=people">Deregister Access</a>)
 	<?php else: ?>
-		(<a href="./?op=register_service&service=contacts">Register Access</a>)
+		(<a href="./?op=register_service&service=people">Register Access</a>)
 	<?php endif ?>
 </li>
 </ul>

@@ -11,6 +11,7 @@ return [
         ],
         'calendar' => [Google_Service_Calendar::CALENDAR],
         'drive' => [Google_Service_Drive::DRIVE],
+        'people' => [Google_Service_PeopleService::CONTACTS],
         'contacts' => ["https://www.google.com/m8/feeds"],
     ],
 ];
