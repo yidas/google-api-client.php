@@ -34,7 +34,7 @@ try {
     
     // Print the names for up to 10 connections.
     $optParams = array(
-        'pageSize' => 100,
+        'pageSize' => 0,
         'personFields' => 'names,emailAddresses,phoneNumbers',
     );
 	$results = $service->people_connections->listPeopleConnections('people/me', $optParams);
@@ -61,111 +61,66 @@ try {
 			$contacts[] = $data;
         }
 	}
-	print_r($contacts);
-	exit;
+	// print_r($contacts);exit;
     
-    /**
-    * Operation
-    */
-    if (isset($_GET['op'])) {
+} catch (Exception $e) {
+
+	switch ($e->getCode()) {
+		case '403':
+			echo 'Access Denied: You don\'t have permissions';
+			break;
+		
+		default:
+			echo $e->getMessage();
+			break;
+	}
+	
+	exit;
+}
         
-        switch ($_GET['op']) {
-            case 'upload':
-            
-            if (isset($_POST["submit"])) {
-                
-                try {
-                    
-                    $files = $_FILES["file_upload"];
-                    
-                    $fileMetadata = new Google_Service_Drive_DriveFile([
-                        'name' => basename($files['name'])
-                        ]);
-                        
-                        $content = file_get_contents($files["tmp_name"]);
-                        
-                        $file = $service->files->create($fileMetadata, [
-                            'data' => $content,
-                            // 'mimeType' => 'image/jpeg',
-                            'uploadType' => 'multipart',
-                            'fields' => 'id'
-                            ]);
-                            
-                        } catch (Exception $e) {
-                            
-                            throw $e;
-                        }    
-                    }
-                    
-                    echo "Operation Success!<br/> Updated ID: {$file->id}<br/> <a href=\"?\">Back to List Page</a>";
-                    
-                    break;
-                    
-                    default:
-                    echo '404 - Bad Operation';
-                    break;
-                }
-                
-                return;
-            }
-            
-            
-            /**
-            * Index List
-            */
-            
-            // Print the names and IDs for up to 10 files.
-            $optParams = [
-                'pageSize' => 10,
-                'fields' => 'nextPageToken, files(id, name)'
-            ];
-            
-            $results = $service->files->listFiles($optParams);
-            
-        } catch (Exception $e) {
-            
-            switch ($e->getCode()) {
-                case '403':
-                echo 'Access Denied: You don\'t have permissions';
-                break;
-                
-                default:
-                echo $e->getMessage();
-                break;
-            }
-            
-            exit;
-        }
+?>
         
-        
-        ?>
-        
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <title>Google API - Drive</title>
-        </head>
-        <body>
-        
-        <h3><a href="./">Google API</a> - Drive</h3>
-        
-        <form action="?op=upload" method="post" enctype="multipart/form-data">
-        Select a file to upload:
-        <input type="file" name="file_upload">
-        <input type="submit" value="Upload" name="submit">
-        </form>
-        
-        <hr/>
-        
-        <?php if (count($results->getFiles()) == 0): ?>
-        No Result: Your Google Drive have no record.
-        <?php else: ?>
-        <ul>
-        <?php foreach ($results->getFiles() as $file): ?>
-        <li><?=printf("%s (%s)\n", $file->getName(), $file->getId())?></li>
-        <?php endforeach ?>
-        </ul>
-        <?php endif ?>
-        
-        </body>
-        </html>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Google API - Drive</title>
+
+<style>
+  td {padding: 5px;}
+</style>
+</head>
+<body>
+
+<h3><a href="./">Google API</a> - Drive</h3>
+
+<form action="?op=add" method="post">
+Name: <input type="text" name="name" size="10" />
+eMail: <input type="text" name="email" size="20" />
+Phone: <input type="text" name="phone" size="10" />
+<input type="submit" value="Add" name="submit">
+</form>
+
+<hr/>
+
+<table border="1" style="border: solid 1px gray; border-collapse: collapse;">
+  <thead>
+    <td>Index</td>
+    <td>Name</td>
+    <td>eMail</td>
+    <td>Phone</td>
+    <td>Function</td>
+  </thead>
+  <?php foreach ($contacts as $key => $contact): ?>
+  <tr>
+    <td><?=$key?></td>
+    <td><?=$contact['name']?></td>
+    <td><?=$contact['email']?></td>
+    <td><?=$contact['phone']?></td>
+    <td></td>
+  </tr>
+  <?php endforeach ?>
+</table>
+
+
+</body>
+</html>
