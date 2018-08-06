@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3e6e79e410cd98a8d86f36f772fe3690",
+    "content-hash": "f6f913eefa928b70b1580ed2c7a6f3f6",
     "packages": [
         {
             "name": "firebase/php-jwt",
@@ -688,14 +688,56 @@
                 "psr-3"
             ],
             "time": "2016-10-10T12:19:37+00:00"
+        },
+        {
+            "name": "yidas/google-apiclient-helper",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yidas/php-google-api-client-helper.git",
+                "reference": "83095b428d805b6fb7ae05bbda7a06ddbb5f9c97"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yidas/php-google-api-client-helper/zipball/83095b428d805b6fb7ae05bbda7a06ddbb5f9c97",
+                "reference": "83095b428d805b6fb7ae05bbda7a06ddbb5f9c97",
+                "shasum": ""
+            },
+            "require": {
+                "google/apiclient": "^2.0",
+                "php": ">=5.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "yidas\\google\\apiHelper\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Google APIs Client Helper - Easy way to accessing Google APIs with PHP",
+            "homepage": "https://github.com/yidas/php-google-api-client-helper",
+            "keywords": [
+                "google api",
+                "google api client",
+                "helper",
+                "php sdk"
+            ],
+            "time": "2018-08-06T05:44:39+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "yidas/google-apiclient-helper": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": ">=5.4.0"
+    },
     "platform-dev": []
 }
