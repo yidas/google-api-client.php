@@ -35,7 +35,7 @@ $client->setRedirectUri($config['redirectUri']);
 $client->setAccessType('offline');
 $client->setApprovalPrompt('force'); 
 
-// Aithorization
+// Authorization
 $accessToken = $client->fetchAccessTokenWithAuthCode($code);
 // print_r($accessToken);exit;
 
