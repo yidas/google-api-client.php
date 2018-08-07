@@ -12,6 +12,10 @@ $config = require __DIR__ . '/../config.inc.php';
 /**
  * OAuth Callback
  */
+if ($_GET['error']) {
+	// Redirect to index
+	header('Location: ./');
+}
 
 $code = isset($_GET['code']) ? $_GET['code'] : null;
 if (!$code) {
