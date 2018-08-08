@@ -66,3 +66,7 @@ This problem could be solved by modifing `vendor/google/apiclient/src/Google/Cli
 // For windows PHP cURL
 $options['verify'] = false;
 ```
+
+### This app isn’t verified Problem
+
+[Google – OAuth Client Verification](https://developers.google.com/apps-script/guides/client-verification)
