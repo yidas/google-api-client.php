@@ -98,11 +98,12 @@ $token = User::getToken();
 
 if ($token) {
 
-	if (!ClientHelper::verifyAccessToken($token['access_token'])) {
+	if (!$tokenInfo = ClientHelper::verifyAccessToken($token['access_token'])) {
 		
-		throw new Exception("Your Google App Access is invalid", 403);
+		die('Your Google App Access is invalid <br/> <a href="./?op=logout">Logout</a>');
+		// throw new Exception("Your Google App Access is invalid", 403);
 	}
-	
+
 	// Set AccessToken into Google_Client
 	ClientHelper::setAccessToken($token);
 
@@ -133,7 +134,8 @@ if ($token) {
 		
 	}
 	
-	$accessToken = json_encode(User::getToken(), JSON_PRETTY_PRINT);
+	$accessToken = json_encode(User::getToken(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+	$tokenInfo = json_encode($tokenInfo, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 	
 } else {
 	
@@ -226,6 +228,8 @@ This is base on register but adding all the service scopes.
 <dd><a href="mailto:<?=$me['email']?>" target="_blank"><?=$me['email']?></a></dd>
 <dt>AccessToken:</dt>
 <dd><pre><?=$accessToken?></pre></dd>
+<dt>TokenInfo (AccessToken has been verified):</dt>
+<dd><pre><?=$tokenInfo?></pre></dd>
 </dl>
 
 <hr/>

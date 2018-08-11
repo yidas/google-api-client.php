@@ -32,10 +32,7 @@ $result = User::saveToken($accessToken);
 $service = User::getRegisterService();
 if ($service == 'all') {
 	
-	// Google Service Scopes
-	$serviceScopes = $config['serviceScopes'];
-
-	foreach ($serviceScopes as $key => $service) {
+	foreach (AppGoogleClient::$scopes as $key => $service) {
 		
 		User::addService($key);
 	}
