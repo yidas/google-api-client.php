@@ -1,44 +1,16 @@
 <?php
 
-$autoloadPath = __DIR__ . '/../vendor/autoload.php';
-if (!file_exists($autoloadPath)) {
-	
-	die('Composer is not set, run `composer install` in the app root.');
-}
+// Bootstrap
+require __DIR__ . '/../bootstrap.php';
 
-require_once $autoloadPath;
-require_once __DIR__ . '/../components/User.php';
+use app\components\AppGoogleClient;
+use app\components\User;
+use yidas\google\apiHelper\Client as ClientHelper;
 
-// Configuration
-$config = require __DIR__ . '/../config.inc.php';
-
-// Check
-if (!file_exists($config['authConfig'])) {
-	
-	die("Please set up Google credential file in {$config['authConfig']}");
-}
-
-
-// Google Service Scopes
-$serviceScopes = $config['serviceScopes'];
-
-// print_r($_GET);
-// print_r($_SERVER);exit;
-
-// Session init
-if (session_status() == PHP_SESSION_NONE) {
-	
-	session_start();
-}
 
 // Client
-$client = new Google_Client();
-$client->setApplicationName('Google API');
-$client->setScopes($serviceScopes['plus']);
-$client->setAuthConfig($config['authConfig']);
-$client->setRedirectUri($config['redirectUri']);
-$client->setAccessType('offline');
-$client->setApprovalPrompt('force'); 
+$client = AppGoogleClient::getClient();
+$client->setScopes(AppGoogleClient::$scopes['plus']);
 
 /**
 * Route: Operation
@@ -58,7 +30,7 @@ if (isset($_GET['op'])) {
 		
 			$service = (isset($_GET['service'])) ? $_GET['service'] : null;
 			
-			if (!$service || !isset($serviceScopes[$service])) {
+			if (!$service || !isset(AppGoogleClient::$scopes[$service])) {
 				
 				echo 'Service not found';exit;
 			}
@@ -66,11 +38,11 @@ if (isset($_GET['op'])) {
 			// Original services
 			$services = User::getServices();
 			foreach ($services as $key => $myService) {
-				$client->addScope($serviceScopes[$myService]);
+				$client->addScope(AppGoogleClient::$scopes[$myService]);
 			}
 
 			// Add Scopes
-			$client->addScope($serviceScopes[$service]);
+			$client->addScope(AppGoogleClient::$scopes[$service]);
 			User::registerService($service);
 
 			$authServicesUrl = $client->createAuthUrl();	
@@ -81,7 +53,7 @@ if (isset($_GET['op'])) {
 
 			$service = (isset($_GET['service'])) ? $_GET['service'] : null;
 			
-			if (!$service || !isset($serviceScopes[$service])) {
+			if (!$service || !isset(AppGoogleClient::$scopes[$service])) {
 				
 				echo 'Service not found';exit;
 			}
@@ -94,7 +66,7 @@ if (isset($_GET['op'])) {
 		case 'register_services':
 
 			// Register all services
-			foreach ($serviceScopes as $key => $service) {
+			foreach (AppGoogleClient::$scopes as $key => $service) {
 				
 				$client->addScope($service);
 			}
@@ -125,13 +97,18 @@ $token = User::getToken();
 // print_r($token);exit;
 
 if ($token) {
-	
-	$client->setAccessToken($token);
-	// Refresh the token if it's expired.
-	if ($client->isAccessTokenExpired()) {
+
+	if (!ClientHelper::verifyAccessToken($token['access_token'])) {
 		
-		$token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-		User::saveToken($token);
+		throw new Exception("Your Google App Access is invalid", 403);
+	}
+	
+	// Set AccessToken into Google_Client
+	ClientHelper::setAccessToken($token);
+
+	// Token auto check
+	if ($accessToken = ClientHelper::refreshAccessToken()) {
+		User::saveToken($accessToken);
 	}
 	
 	// Plus Service
