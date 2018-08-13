@@ -2,6 +2,7 @@
 
 namespace app\components;
 
+use app\components\User;
 use yidas\google\apiHelper\Client as ClientHelper;
 
 class AppGoogleClient
@@ -48,5 +49,42 @@ class AppGoogleClient
         }
             
         return ClientHelper::getClient();;
+    }
+
+    /**
+     * Authorized process
+     *
+     * @param array $scopes
+     * @return GOOGLE_Client 
+     */
+    public static function authProcess($scopes=[])
+    {
+        // User token check
+        $token = User::getToken();
+        if (!User::getToken()) {
+            
+            header('Location: ./');
+        }
+
+        // Client
+        $client = self::getClient();
+
+        // Set AccessToken into Google_Client
+        ClientHelper::setAccessToken($token);
+
+        // Token auto check
+        if ($accessToken = ClientHelper::refreshAccessToken()) {
+            User::saveToken($accessToken);
+        }
+
+        // Check Scopes
+        if ($scopes) {
+            
+            if (!ClientHelper::verifyScopes($scopes)) {
+                die("You don't have permission for this service scopes");
+            }
+        }
+        
+        return $client;
     }
 }
