@@ -21,7 +21,7 @@ if (isset($_GET['op'])) {
 		
 		case 'register':
 		
-			$authUrl = $client->createAuthUrl();
+			$authUrl = ClientHelper::createAuthUrl();
 			header("Location: {$authUrl}");
 			
 			break;
@@ -38,14 +38,14 @@ if (isset($_GET['op'])) {
 			// Original services
 			$services = User::getServices();
 			foreach ($services as $key => $myService) {
-				$client->addScope(AppGoogleClient::$scopes[$myService]);
+				ClientHelper::addScope(AppGoogleClient::$scopes[$myService]);
 			}
 
 			// Add Scopes
-			$client->addScope(AppGoogleClient::$scopes[$service]);
+			ClientHelper::addScope(AppGoogleClient::$scopes[$service]);
 			User::registerService($service);
 
-			$authServicesUrl = $client->createAuthUrl();	
+			$authServicesUrl = ClientHelper::createAuthUrl();	
 			header("Location: {$authServicesUrl}");
 			break;
 			
@@ -68,12 +68,12 @@ if (isset($_GET['op'])) {
 			// Register all services
 			foreach (AppGoogleClient::$scopes as $key => $service) {
 				
-				$client->addScope($service);
+				ClientHelper::addScope($service);
 			}
 
 			User::registerService('all');
 
-			$authServicesUrl = $client->createAuthUrl();	
+			$authServicesUrl = ClientHelper::createAuthUrl();	
 			header("Location: {$authServicesUrl}");
 			break;
 		
@@ -140,7 +140,7 @@ if ($token) {
 } else {
 	
 	// Not login
-	$authUrl = $client->createAuthUrl();
+	$authUrl = ClientHelper::createAuthUrl();
 }
 
 

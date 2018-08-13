@@ -4,12 +4,14 @@
 require __DIR__ . '/../bootstrap.php';
 
 use app\components\AppGoogleClient;
+use yidas\google\apiHelper\services\People as PeopleHelper;
 
 // Service bootstrap
 $client = AppGoogleClient::authProcess(AppGoogleClient::$scopes['people']);
 
 // Get Service
-$service = new Google_Service_PeopleService($client);
+$service = PeopleHelper::setClient($client)
+    ->getService();
 
 try {
 
@@ -104,38 +106,9 @@ try {
         
         default:
 
-            // Print the names for up to 10 connections.
-            $optParams = array(
-                'pageSize' => 0,
-                'personFields' => 'names,emailAddresses,phoneNumbers',
-            );
-            $results = $service->people_connections->listPeopleConnections('people/me', $optParams);
-            
-            // Parser
-            $contacts = [];
-            
-            if (count($results->getConnections()) != 0) {
-                
-                foreach ($results->getConnections() as $person) {
+            // Get formated list by Helper
+            $contacts = PeopleHelper::getSimpleContacts();
 
-                    // var_dump($person);exit;
-                    $data = [];
-                    // Resource name
-                    $data['id'] = $person->getResourceName();
-                    $data['name'] = isset($person->getNames()[0]) 
-                        ? $person->getNames()[0]->getDisplayName() 
-                        : null;
-                    $data['email'] = isset($person->getEmailAddresses()[0]) 
-                        ? $person->getEmailAddresses()[0]->getValue() 
-                        : null;
-                    $data['phone'] = isset($person->getPhoneNumbers()[0]) 
-                        ? $person->getPhoneNumbers()[0]->getValue() 
-                        : null;
-
-                    $contacts[] = $data;
-                }
-            }
-            // print_r($contacts);exit;
             break;
     }
     
